@@ -1,5 +1,15 @@
 let sensorData = [], noaaData = [], variables = [];
 
+
+const variableUnits = {
+  turbidity: "NTU",
+  depth: "inch",
+  pH: "pH",
+  conductivity: "µS/cm",
+  velocity : "ft/s",
+  rdo: "mg/L",
+};
+
 async function loadData() {
   sensorData = await fetch("sensor_data.json").then(res => res.json());
   noaaData = await fetch("noaa.json").then(res => res.json());
@@ -71,6 +81,8 @@ function drawInitialCharts() {
 function drawSensorChart() {
   const selectedVar = document.getElementById("var-select").value || variables[0];
   const traces = [];
+  const unit = variableUnits[selectedVar] || "";
+  const yTitle = unit ? `${selectedVar} (${unit})` : selectedVar;
 
   const grouped = sensorData.reduce((acc, row) => {
     acc[row.sensor_Id] = acc[row.sensor_Id] || [];
@@ -80,19 +92,23 @@ function drawSensorChart() {
 
   for (let sid in grouped) {
     const sensorRows = grouped[sid];
+    const unit = variableUnits[selectedVar] || "";
+
     traces.push({
       x: sensorRows.map(r => r.date),
       y: sensorRows.map(r => r[selectedVar]),
       name: `Sensor ${sid}`,
       type: "scatter",
-      mode: "lines"
+      mode: "lines",
+      hovertemplate: 
+        `Sensor ${sid}<br>Date: %{x}<br>${selectedVar}: %{y}${unit ? " " + unit : ""}<extra></extra>`
     });
   }
 
   Plotly.newPlot("sensor-chart", traces, {
     
     title: {
-      text: `${selectedVar} over Time`,
+      text: `${selectedVar} over Time${unit ? " (" + unit + ")" : ""}`,
       font: { size: 22 }
     },
     xaxis: {
@@ -105,7 +121,7 @@ function drawSensorChart() {
       type: 'date'
     },
     yaxis: {
-        title: selectedVar,
+        title: yTitle,
         showgrid: false,
         gridcolor: '#e0e0e0',
         autorange: true,
@@ -133,6 +149,10 @@ function drawSensorChart() {
 function drawGauges() {
   const selectedVar = document.getElementById("var-select").value || variables[0];
   const selectedMonth = document.getElementById("month-select").value;
+  const unit = variableUnits[selectedVar] || "";
+const label = (prefix) => `${prefix} ${selectedVar}${unit ? " (" + unit + ")" : ""}`;
+
+
 
   const filtered = sensorData.filter(d => d.month === selectedMonth && d[selectedVar] != null);
   if (!filtered.length) return;
@@ -155,9 +175,9 @@ function drawGauges() {
     }]);
   };
 
-  createGauge("gauge-mean", mean, `Mean ${selectedVar}`);
-  createGauge("gauge-max", max, `Max ${selectedVar}`);
-  createGauge("gauge-min", min, `Min ${selectedVar}`);
+  createGauge("gauge-mean", mean, label("Mean"));
+createGauge("gauge-max", max, label("Max"));
+createGauge("gauge-min", min, label("Min"));
 }
 
 loadData();

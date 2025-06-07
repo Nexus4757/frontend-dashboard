@@ -12,7 +12,7 @@ const variableUnits = {
 
 async function loadData() {
   sensorData = await fetch("sensor_data.json").then(res => res.json());
-  noaaData = await fetch("noaa.json").then(res => res.json());
+  noaaData = await fetch("noaa_precip_data.json").then(res => res.json());
   variables = Object.keys(sensorData[0]).filter(k => !["date", "sensor_Id", "month"].includes(k));
 
   populateDropdowns();
@@ -52,7 +52,7 @@ function drawInitialCharts() {
     x: noaaData.map(d => d.date),
     y: noaaData.map(d => d.precipitation),
     type: "scatter",
-    mode: "lines+markers",
+    mode: "lines",
     name: "Precipitation"
   }], {
     title: {

@@ -97,11 +97,11 @@ function drawSensorChart() {
     traces.push({
       x: sensorRows.map(r => r.date),
       y: sensorRows.map(r => r[selectedVar]),
-      name: `Sensor ${sid}`,
+      name: `Outfall ${sid}`,
       type: "scatter",
       mode: "lines",
       hovertemplate: 
-        `Sensor ${sid}<br>Date: %{x}<br>${selectedVar}: %{y}${unit ? " " + unit : ""}<extra></extra>`
+        `Outfall ${sid}<br>Date: %{x}<br>${selectedVar}: %{y}${unit ? " " + unit : ""}<extra></extra>`
     });
   }
 
